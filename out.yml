@@ -1,0 +1,25 @@
+Resources:
+  SimpleGlueJob:
+    Properties:
+      Command:
+        Name: glueetl
+        ScriptLocation: s3://rmd-batch-job-scripts/lool/369d0b41cdae76193e1c9acf0e25699d
+      DefaultArguments:
+        --extra-files: s3://rmd-batch-job-scripts/lool/6bcc2fdc4665c4730b70789b0e64c862
+        --extra-py-files: s3://rmd-batch-job-scripts/lool/b32b80e32b030a28de44454d25a985da
+      Name: simple-glue-job
+    Type: AWS::Glue::Job
+  SimpleGlueJobRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - glue.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+    Type: AWS::IAM::Role

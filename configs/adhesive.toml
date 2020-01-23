@@ -1,0 +1,4 @@
+region = "us-west-2"
+s3-bucket = "my-source-bucket"
+s3-prefix = "aws-glue-artifacts"
+stack-name = "adhesive-example"

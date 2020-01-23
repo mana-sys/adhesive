@@ -1,0 +1,27 @@
+Resources:
+  SimpleGlueJobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - "glue.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+  SimpleGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Command:
+        Name: glueetl
+        ScriptLocation: state.go
+      DefaultArguments:
+        --extra-files: sandbox
+        --extra-py-files: remove.go
+      Name: simple-glue-job
+      Role: !Ref SimpleGlueJobRole
