@@ -81,7 +81,7 @@ func monitorStack(cfn *cloudformation.CloudFormation, stackId, stackName string,
 		}
 	}
 
-	fmt.Printf("\n%s: operation complete after %v\n", stackName,
+	fmt.Printf("\nOperation complete after %v.\n",
 		time.Now().Round(1*time.Second).Sub(state.start))
 
 	return out, nil

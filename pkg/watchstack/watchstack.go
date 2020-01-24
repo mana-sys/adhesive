@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -29,6 +30,14 @@ func New(cfn cloudformationiface.CloudFormationAPI) *WatchStack {
 		PollInterval: time.Second,
 		W:            os.Stdout,
 	}
+}
+
+func isFailedResource(status string) bool {
+	return strings.HasSuffix(status, "FAILED")
+}
+
+func isSuccessResource(status string) bool {
+	return strings.HasSuffix(status, "COMPLETE")
 }
 
 func (w *WatchStack) StreamEvents(ctx context.Context, stackId string) error {
@@ -58,11 +67,18 @@ func (w *WatchStack) StreamEvents(ctx context.Context, stackId string) error {
 				continue
 			}
 
+			c := color.YellowString
+			if isSuccessResource(*event.ResourceStatus) {
+				c = color.GreenString
+			} else if isFailedResource(*event.ResourceStatus) {
+				c = color.RedString
+			}
+
 			fmt.Fprintf(w.W, "[%s] %s (%s): %s\n",
 				color.WhiteString(event.Timestamp.Format(time.RFC3339)),
 				*event.LogicalResourceId,
 				*event.ResourceType,
-				color.GreenString(*event.ResourceStatus),
+				c(*event.ResourceStatus),
 			)
 			seenEvents[*event.EventId] = struct{}{}
 		}
