@@ -8,15 +8,16 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 	"time"
-
-	"github.com/olekukonko/tablewriter"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/fatih/color"
 	"github.com/mana-sys/adhesive/internal/cli/command"
 	"github.com/mana-sys/adhesive/internal/cli/config"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
@@ -177,16 +178,15 @@ func deploy(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptions) error 
 		if status == cloudformation.ChangeSetStatusCreateComplete {
 			break
 		} else if status == cloudformation.ChangeSetStatusFailed {
+			if strings.HasPrefix(*changeSetOutput.StatusReason, "The submitted information didn't contain changes.") {
+				fmt.Printf("\nNo changes to make.\n")
+				return nil
+			}
+
 			return fmt.Errorf("failed to create change set: %s", *changeSetOutput.StatusReason)
 		}
 
 		time.Sleep(time.Second)
-	}
-
-	// If there are no changes, we are done.
-	if len(changeSetOutput.Changes) == 0 {
-		fmt.Printf("\nNo changes to make.\n")
-		return nil
 	}
 
 	fmt.Printf(`
@@ -195,6 +195,22 @@ The following changes will be made as part of the deployment:
 
 `)
 
+	var (
+		numAdd    int
+		numRemove int
+		numUpdate int
+	)
+
+	for _, change := range changeSetOutput.Changes {
+		if *change.ResourceChange.Action == "Add" {
+			numAdd += 1
+		} else if *change.ResourceChange.Action == "Remove" {
+			numRemove += 1
+		} else if *change.ResourceChange.Action == "Update" {
+			numUpdate += 1
+		}
+	}
+
 	// Output the proposed changes.
 	renderChangeSet(os.Stdout, changeSetOutput.Changes)
 
@@ -202,6 +218,12 @@ The following changes will be made as part of the deployment:
 	if opts.NoExecuteChangeSet {
 		return nil
 	}
+
+	fmt.Printf("\nChange set: %s, %s, %s\n",
+		color.GreenString("%d to add", numAdd),
+		color.YellowString("%d to update", numUpdate),
+		color.RedString("%d to remove", numRemove),
+	)
 
 	// If the --confirm-change-set flag is present, prompt for confirmation.
 	confirm, err := scannerPrompt(sc, `
@@ -219,8 +241,34 @@ Do you want to apply this change set?
 
 	if confirm != "yes" {
 		fmt.Printf("\nDeploy cancelled.\n")
+		return nil
 	}
 
+	fmt.Println()
+
+	_, err = cfn.ExecuteChangeSet(&cloudformation.ExecuteChangeSetInput{
+		StackName:     changeSetOutput.StackId,
+		ChangeSetName: changeSetOutput.ChangeSetName,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Sent change set execution request.\n\n")
+
+	// Wait until stack completion is done.
+	if err := monitorStack(cfn, *changeSetOutput.StackId, *changeSetOutput.StackName); err != nil {
+		return err
+	}
+
+	fmt.Println()
+	color.Green("Change set execution complete!")
+	fmt.Printf("Summary of changes: %s, %s, %s\n",
+		color.GreenString("%d added", numAdd),
+		color.YellowString("%d updated", numUpdate),
+		color.RedString("%d removed", numRemove),
+	)
 	return nil
 }
 
@@ -261,7 +309,13 @@ func renderChangeSet(w io.Writer, changes []*cloudformation.Change) {
 			color = tablewriter.FgYellowColor
 		}
 
-		table.Rich(v, []tablewriter.Colors{{color}, {tablewriter.FgWhiteColor}, {tablewriter.FgWhiteColor}, {tablewriter.FgWhiteColor}})
+		table.Rich(v, []tablewriter.Colors{
+			{color},
+			{tablewriter.FgWhiteColor},
+			{tablewriter.FgWhiteColor},
+			{tablewriter.FgWhiteColor},
+			{tablewriter.FgWhiteColor},
+		})
 	}
 	table.Render()
 }
