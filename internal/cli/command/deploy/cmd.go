@@ -255,20 +255,29 @@ Do you want to apply this change set?
 		return err
 	}
 
-	fmt.Printf("Sent change set execution request.\n\n")
+	fmt.Printf("Sent the change set execution request. You may track the stack status below:\n\n")
 
 	// Wait until stack completion is done.
-	if err := monitorStack(cfn, *changeSetOutput.StackId, *changeSetOutput.StackName); err != nil {
+	stackOut, err := monitorStack(cfn, *changeSetOutput.StackId, *changeSetOutput.StackName, OpUpdate)
+	if err != nil {
 		return err
 	}
 
+	// Print change set execution summary.
 	fmt.Println()
 	color.Green("Change set execution complete!")
-	fmt.Printf("Summary of changes: %s, %s, %s\n",
+	fmt.Printf("Summary of changes: %s, %s, %s\n\n",
 		color.GreenString("%d added", numAdd),
 		color.YellowString("%d updated", numUpdate),
 		color.RedString("%d removed", numRemove),
 	)
+
+	// Print stack outputs.
+	fmt.Println("Outputs: ")
+	for _, output := range stackOut.Stacks[0].Outputs {
+		fmt.Printf("%s = %s\n", *output.OutputKey, *output.OutputValue)
+	}
+
 	return nil
 }
 
