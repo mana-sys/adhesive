@@ -1,4 +1,33 @@
+# The region in which all operations will take place.
 region = "us-west-2"
-s3-bucket = "my-source-bucket"
-s3-prefix = "aws-glue-artifacts"
-stack-name = "adhesive-example"
+
+# The AWS profile to use for authentication.
+# profile = ""
+
+
+# Default options for the "adhesive deploy" command.
+[deploy]
+
+
+# Default options for the "adhesive local" command.
+[local]
+
+
+# Default options for the "adhesive package" command.
+[package]
+# The path where your AWS CloudFormation template is located.
+# template-file = "template.yml"
+
+# The S3 bucket where artifacts will be uploaded.
+# s3-bucket = "bucket"
+
+# The prefix added to the names of the artifacts uploaded to the S3 bucket.
+# s3-prefix = "prefix"
+
+# The ID of the KMS key used to encrypt artifacts in the S3 bucket.
+# kms-key-id = "1234abcd-12ab-34cd-56ef-1234567890ab"
+
+# The path to the file to which the packaged template will be written.
+# output-template-file = "template-packaged.yml"
+
+
