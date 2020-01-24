@@ -28,3 +28,9 @@ to local artifacts replaced with their corresponding Amazon S3 locations.
 ```
 adhesive package [flags]
 ```
+
+| Option | Description |
+| ------ | --- |
+| `--template-file` | The path where your AWS CloudFormation template is located. |
+| `--s3-bucket` | The S3 bucket where artifacts will be uploaded. |
+| `--s3-prefix` | The prefix added to the names of the artifacts uploaded to the S3 bucket. |
