@@ -5,7 +5,6 @@ package packager
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -107,7 +106,6 @@ func tempZipFile(sources []string, dir, pattern string) (string, error) {
 func (p *Packager) exportTemplateArtifacts(template *cloudformation.Template) error {
 	for _, resource := range template.Resources {
 		for _, exportedResource := range p.exportedResources {
-			fmt.Fprintln(os.Stderr, exportedResource)
 			untyped, ok := exportedResource.GetProperty(resource)
 			if !ok {
 				continue
@@ -125,8 +123,6 @@ func (p *Packager) exportTemplateArtifacts(template *cloudformation.Template) er
 				if err != nil {
 					return err
 				}
-
-				fmt.Fprintln(os.Stderr, "Replacing property", remotePath)
 
 				// Replace the original path with the new remote path.
 				exportedResource.ReplaceProperty(resource, remotePath)

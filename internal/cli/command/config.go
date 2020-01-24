@@ -16,6 +16,10 @@ type Config struct {
 	TemplatePath string
 }
 
+type Config2 struct {
+	Region string
+}
+
 type ErrMissingProperty struct {
 	Property string
 }

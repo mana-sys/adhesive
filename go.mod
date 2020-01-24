@@ -8,6 +8,7 @@ require (
 	github.com/awslabs/goformation/v4 v4.1.0
 	github.com/fatih/color v1.9.0
 	github.com/mholt/archiver/v3 v3.3.0
+	github.com/olekukonko/tablewriter v0.0.4
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0

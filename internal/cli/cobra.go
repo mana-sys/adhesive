@@ -39,7 +39,7 @@ func NewRootCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 		"Path to Adhesive configuration file")
 
 	cmd.AddCommand(
-		deploy.NewDeployCommand(),
+		deploy.NewDeployCommand(adhesiveCli),
 		local.NewLocalCommand(),
 		package1.NewPackageCommand(adhesiveCli),
 		remove.NewRemoveCommand(adhesiveCli),
