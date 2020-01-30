@@ -58,16 +58,12 @@ func package1(adhesiveCli *command.AdhesiveCli, opts *packageOptions) error {
 	// or from the CLI instance itself.
 	if opts.s3Bucket != "" {
 		s3Bucket = opts.s3Bucket
-	} else if adhesiveCli.Config.S3Bucket != "" {
-		s3Bucket = adhesiveCli.Config.S3Bucket
 	} else {
 		return errors.New("must specify an S3 bucket")
 	}
 
 	if opts.s3Prefix != "" {
 		s3Prefix = opts.s3Prefix
-	} else {
-		s3Prefix = adhesiveCli.Config.S3Prefix
 	}
 
 	// Initialize a packager.

@@ -2,8 +2,7 @@
 region = "us-west-2"
 
 # The AWS profile to use for authentication.
-# profile = ""
-
+# profile = "dev"
 
 # Default options for the "adhesive deploy" command.
 [deploy]

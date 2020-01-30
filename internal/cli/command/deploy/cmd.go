@@ -17,6 +17,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/mana-sys/adhesive/internal/cli/command"
 	"github.com/mana-sys/adhesive/internal/cli/config"
+	"github.com/mana-sys/adhesive/internal/cli/util"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -46,29 +47,6 @@ func NewDeployCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 	return cmd
 }
 
-func scannerPrompt(sc *bufio.Scanner, text string, allowed []string) (string, error) {
-	for {
-		fmt.Print(text)
-		if !sc.Scan() {
-			if sc.Err() == nil {
-				return "", io.EOF
-			}
-			return "", sc.Err()
-		}
-		got := sc.Text()
-		if len(allowed) == 0 {
-			return got, nil
-		}
-		for _, v := range allowed {
-			if v == got {
-				return got, nil
-			}
-		}
-
-		fmt.Println("Invalid input; please try again.")
-	}
-}
-
 func promptOptions(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptions) (bool, error) {
 	var err error
 	sc := bufio.NewScanner(os.Stdin)
@@ -85,14 +63,14 @@ func promptOptions(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptions)
 		prompt += "(" + opts.StackName + ") "
 	}
 
-	opts.StackName, err = scannerPrompt(sc, prompt, nil)
+	opts.StackName, err = util.ScannerPrompt(sc, prompt, nil)
 	if err != nil {
 		return false, err
 	}
 
 	// Prompt confirm change set before deployment.
 	prompt = fmt.Sprintf("confirm changes before deployment: (%s) ", strconv.FormatBool(opts.ConfirmChangeSet))
-	confirmChangeSet, err := scannerPrompt(sc, prompt, []string{"true", "false"})
+	confirmChangeSet, err := util.ScannerPrompt(sc, prompt, []string{"true", "false"})
 	if err != nil {
 		return false, err
 	}
@@ -226,7 +204,7 @@ The following changes will be made as part of the deployment:
 	)
 
 	// If the --confirm-change-set flag is present, prompt for confirmation.
-	confirm, err := scannerPrompt(sc, `
+	confirm, err := util.ScannerPrompt(sc, `
 Do you want to apply this change set?
     Only "yes" will be accepted to approve.
 
@@ -258,7 +236,7 @@ Do you want to apply this change set?
 	fmt.Printf("Sent the change set execution request. You may track the stack status below:\n\n")
 
 	// Wait until stack completion is done.
-	stackOut, err := monitorStack(cfn, *changeSetOutput.StackId, *changeSetOutput.StackName, OpUpdate)
+	stackOut, err := util.MonitorStack(cfn, *changeSetOutput.StackId, *changeSetOutput.StackName, util.OpUpdate)
 	if err != nil {
 		return err
 	}

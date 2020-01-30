@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	adhesiveCli, err := command.NewAdhesiveCli()
+	adhesiveCli, err := command.NewAdhesiveCli("")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

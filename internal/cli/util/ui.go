@@ -1,15 +1,16 @@
-package deploy
+package util
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
-	"github.com/mana-sys/adhesive/pkg/watchstack"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/mana-sys/adhesive/pkg/watchstack"
 )
 
 type stackOp int
@@ -45,7 +46,7 @@ func isFailed(status string) bool {
 		strings.HasSuffix(status, "ROLLBACK_FAILED")
 }
 
-func monitorStack(cfn *cloudformation.CloudFormation, stackId, stackName string, op stackOp) (*cloudformation.DescribeStacksOutput, error) {
+func MonitorStack(cfn *cloudformation.CloudFormation, stackId, stackName string, op stackOp) (*cloudformation.DescribeStacksOutput, error) {
 	var (
 		err error
 		out *cloudformation.DescribeStacksOutput
@@ -87,7 +88,7 @@ func monitorStack(cfn *cloudformation.CloudFormation, stackId, stackName string,
 	return out, nil
 }
 
-func consoleMonitorStack(ctx context.Context, state stackMonitorState) {
+func ConsoleMonitorStack(ctx context.Context, state stackMonitorState) {
 	ticker := time.NewTicker(state.uiInterval)
 
 	var message string
@@ -109,5 +110,28 @@ func consoleMonitorStack(ctx context.Context, state stackMonitorState) {
 		case t := <-ticker.C:
 			fmt.Printf("%s: %s (%v elapsed)\n", state.name, message, t.Round(time.Second).Sub(state.start))
 		}
+	}
+}
+
+func ScannerPrompt(sc *bufio.Scanner, text string, allowed []string) (string, error) {
+	for {
+		fmt.Print(text)
+		if !sc.Scan() {
+			if sc.Err() == nil {
+				return "", io.EOF
+			}
+			return "", sc.Err()
+		}
+		got := sc.Text()
+		if len(allowed) == 0 {
+			return got, nil
+		}
+		for _, v := range allowed {
+			if v == got {
+				return got, nil
+			}
+		}
+
+		fmt.Println("Invalid input; please try again.")
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/mana-sys/adhesive/internal/cli/config"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,7 +19,7 @@ type State struct {
 // Adhesive represents a running instance of the Adhesive application.
 type AdhesiveCli struct {
 	State  *State
-	Config *Config
+	Config *config.Config
 
 	FoundConfigFile bool
 
@@ -26,14 +27,18 @@ type AdhesiveCli struct {
 	s3  *s3.S3
 }
 
-func NewAdhesiveCli() (*AdhesiveCli, error) {
+func NewAdhesiveCli(path string) (*AdhesiveCli, error) {
 	var (
-		config          = NewConfig()
+		conf            = config.NewConfig()
 		foundConfigFile bool
 	)
 
+	if path == "" {
+		path = "adhesive.toml"
+	}
+
 	// Try reading configuration from adhesive.toml
-	err := LoadConfigFileInto(config, "adhesive.toml")
+	err := config.LoadConfigFileInto(conf, path)
 	if pathErr, ok := err.(*os.PathError); ok && os.IsNotExist(pathErr) {
 		foundConfigFile = true
 	} else if err != nil {
@@ -41,7 +46,7 @@ func NewAdhesiveCli() (*AdhesiveCli, error) {
 	}
 
 	return &AdhesiveCli{
-		Config:          config,
+		Config:          conf,
 		FoundConfigFile: foundConfigFile,
 	}, nil
 }

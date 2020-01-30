@@ -51,6 +51,7 @@ type Packager struct {
 	S3Bucket string
 	S3Prefix string
 
+	artifacts         map[string]string
 	exportedResources ExportedResources
 	svc               s3iface.S3API
 }
@@ -104,6 +105,7 @@ func tempZipFile(sources []string, dir, pattern string) (string, error) {
 // exportTemplateArtifacts exports the template's artifacts by uploading them
 // to S3.
 func (p *Packager) exportTemplateArtifacts(template *cloudformation.Template) error {
+	p.artifacts = make(map[string]string)
 	for _, resource := range template.Resources {
 		for _, exportedResource := range p.exportedResources {
 			untyped, ok := exportedResource.GetProperty(resource)
@@ -126,6 +128,7 @@ func (p *Packager) exportTemplateArtifacts(template *cloudformation.Template) er
 
 				// Replace the original path with the new remote path.
 				exportedResource.ReplaceProperty(resource, remotePath)
+				p.artifacts[path] = remotePath
 			default:
 				return errors.New("invalid property type")
 			}
@@ -141,4 +144,8 @@ func (p *Packager) marshalTemplate(template *cloudformation.Template) ([]byte, e
 	} else {
 		return template.YAML()
 	}
+}
+
+func (p *Packager) Artifacts() map[string]string {
+	return p.artifacts
 }
