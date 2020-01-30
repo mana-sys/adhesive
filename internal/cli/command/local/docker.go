@@ -66,7 +66,5 @@ func buildAndRunDockerCommand(entrypoint string, options *dockerOptions, args []
 		return err
 	}
 
-	err = dockerCmd.Wait()
-
-	return err
+	return dockerCmd.Wait()
 }

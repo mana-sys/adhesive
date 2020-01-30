@@ -24,7 +24,8 @@ type PackageOptions struct {
 }
 
 type HistoryServerOptions struct {
-	Port int
+	Port         int
+	LogDirectory string
 }
 
 type RemoveOptions struct {

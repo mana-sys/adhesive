@@ -62,6 +62,7 @@ func startJobRun(adhesiveCli *command.AdhesiveCli, opts *config.StartJobRunOptio
 		name = *out.StackResourceDetail.PhysicalResourceId
 	}
 
+	// Start the job.
 	_, err := glu.StartJobRun(&glue.StartJobRunInput{
 		JobName: aws.String(name),
 	})
@@ -70,5 +71,6 @@ func startJobRun(adhesiveCli *command.AdhesiveCli, opts *config.StartJobRunOptio
 		return err
 	}
 
+	// TODO: If the --tail-logs option is enabled, then stream the logs to the console.
 	return nil
 }

@@ -8,8 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mana-sys/adhesive/pkg/watchlog"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
 	"github.com/mana-sys/adhesive/pkg/watchstack"
 )
 
@@ -25,6 +28,10 @@ const (
 	OpCreate stackOp = iota
 	OpUpdate
 	OpDelete
+)
+
+const (
+	GlueErrorLogsPrefix = "/awsglue-"
 )
 
 type stackMonitorState struct {
@@ -86,6 +93,14 @@ func MonitorStack(cfn *cloudformation.CloudFormation, stackId, stackName string,
 		time.Now().Round(1*time.Second).Sub(state.start))
 
 	return out, nil
+}
+
+func MonitorJobLogs(cwl *cloudwatchlogs.CloudWatchLogs, name, id string) error {
+	//ctx, cancel := context.WithCancel(context.Background())
+	w := watchlog.NewWatchLog(cwl)
+
+	// Wait for the log streams to become available.
+
 }
 
 func ConsoleMonitorStack(ctx context.Context, state stackMonitorState) {
