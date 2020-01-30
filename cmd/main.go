@@ -13,7 +13,7 @@ import (
 func main() {
 	adhesiveCli, err := command.NewAdhesiveCli("")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
 		os.Exit(1)
 	}
 
@@ -24,7 +24,7 @@ func main() {
 			os.Exit(exitErr.ExitCode())
 		}
 
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
 		os.Exit(1)
 	}
 }

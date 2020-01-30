@@ -3,6 +3,8 @@ package command
 import (
 	"os"
 
+	"github.com/aws/aws-sdk-go/service/glue"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -23,8 +25,9 @@ type AdhesiveCli struct {
 
 	FoundConfigFile bool
 
-	cfn *cloudformation.CloudFormation
-	s3  *s3.S3
+	cfn  *cloudformation.CloudFormation
+	s3   *s3.S3
+	glue *glue.Glue
 }
 
 func NewAdhesiveCli(path string) (*AdhesiveCli, error) {
@@ -65,6 +68,7 @@ func (cli *AdhesiveCli) InitializeClients() error {
 
 	cli.cfn = cloudformation.New(sess)
 	cli.s3 = s3.New(sess)
+	cli.glue = glue.New(sess)
 	return nil
 }
 
@@ -74,4 +78,8 @@ func (cli *AdhesiveCli) S3() *s3.S3 {
 
 func (cli *AdhesiveCli) CloudFormation() *cloudformation.CloudFormation {
 	return cli.cfn
+}
+
+func (cli *AdhesiveCli) Glue() *glue.Glue {
+	return cli.glue
 }

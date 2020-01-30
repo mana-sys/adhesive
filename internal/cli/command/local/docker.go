@@ -2,13 +2,9 @@ package local
 
 import (
 	"errors"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sync"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -62,45 +58,15 @@ func buildAndRunDockerCommand(entrypoint string, options *dockerOptions, args []
 		return err
 	}
 
-	stdout, err := dockerCmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	stderr, err := dockerCmd.StderrPipe()
-	if err != nil {
-		return err
-	}
 	dockerCmd.Stdin = os.Stdin
-
-	var wg sync.WaitGroup
-
-	go func() {
-		defer stdout.Close()
-		io.Copy(os.Stdout, stdout)
-		log.Debugf("End of stdout")
-		wg.Done()
-	}()
-	go func() {
-		defer stdout.Close()
-		io.Copy(os.Stderr, stderr)
-		log.Debugf("End of stderr")
-		wg.Done()
-	}()
-	//go func() {
-	//	defer stdin.Close()
-	//	io.Copy(stdin, os.Stdin)
-	//	log.Debugf("End of stdin")
-	//	wg.Done()
-	//}()
-
-	wg.Add(2)
+	dockerCmd.Stdout = os.Stdout
+	dockerCmd.Stderr = os.Stderr
 
 	if err = dockerCmd.Start(); err != nil {
 		return err
 	}
 
 	err = dockerCmd.Wait()
-	wg.Wait()
 
 	return err
 }

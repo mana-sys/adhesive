@@ -31,8 +31,16 @@ type RemoveOptions struct {
 	StackName string `toml:"stack-name"`
 }
 
+type StartJobRunOptions struct {
+	JobName   string `toml:"job-name"`
+	JobRunID  string `toml:"job-run-id"`
+	StackName string `toml:"stack-name"`
+	TailLogs  bool   `toml:"tail-logs"`
+}
+
 type Config struct {
 	Deploy        DeployOptions
+	StartJobRun   StartJobRunOptions
 	Local         LocalOptions
 	Package       PackageOptions
 	Remove        RemoveOptions

@@ -10,7 +10,7 @@ func NewPipCommand(opts *dockerOptions) *cobra.Command {
 		Short:              "Install Python dependencies for local job runs",
 		DisableFlagParsing: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return buildAndRunDockerCommand("pytest", opts, args)
+			return buildAndRunDockerCommand("pip", opts, args)
 		},
 	}
 

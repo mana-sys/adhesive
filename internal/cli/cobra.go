@@ -3,9 +3,11 @@ package cli
 import (
 	"github.com/mana-sys/adhesive/internal/cli/command"
 	"github.com/mana-sys/adhesive/internal/cli/command/deploy"
+	"github.com/mana-sys/adhesive/internal/cli/command/historyserver"
 	"github.com/mana-sys/adhesive/internal/cli/command/local"
 	package1 "github.com/mana-sys/adhesive/internal/cli/command/package"
 	"github.com/mana-sys/adhesive/internal/cli/command/remove"
+	"github.com/mana-sys/adhesive/internal/cli/command/startjobrun"
 	"github.com/mana-sys/adhesive/internal/cli/version"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -43,6 +45,8 @@ func NewRootCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 		local.NewLocalCommand(),
 		package1.NewPackageCommand(adhesiveCli),
 		remove.NewRemoveCommand(adhesiveCli),
+		historyserver.NewHistoryServerCommand(adhesiveCli),
+		startjobrun.NewStartJobRunCommand(adhesiveCli),
 	)
 
 	return cmd
