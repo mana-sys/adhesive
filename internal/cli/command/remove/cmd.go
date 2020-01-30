@@ -6,14 +6,12 @@ import (
 	"io"
 	"os"
 
-	"github.com/fatih/color"
-
-	"github.com/mana-sys/adhesive/internal/cli/util"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/fatih/color"
 	"github.com/mana-sys/adhesive/internal/cli/command"
 	"github.com/mana-sys/adhesive/internal/cli/config"
+	"github.com/mana-sys/adhesive/internal/cli/util"
 	"github.com/spf13/cobra"
 )
 
@@ -72,6 +70,7 @@ func remove(adhesiveCli *command.AdhesiveCli, opts *config.RemoveOptions) error 
 		return nil
 	}
 
+	// Delete the stack.
 	_, err = cfn.DeleteStack(&cloudformation.DeleteStackInput{
 		StackName: stack.StackId,
 	})
@@ -81,6 +80,7 @@ func remove(adhesiveCli *command.AdhesiveCli, opts *config.RemoveOptions) error 
 
 	fmt.Printf("\nSent stack deletion request. You may track the stack status below:\n\n")
 
+	// Wait for the stack to finish deleting and stream CloudFormation events to the user.
 	_, err = util.MonitorStack(cfn, *stack.StackId, *stack.StackName, util.OpDelete)
 	if err != nil {
 		return err

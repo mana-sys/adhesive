@@ -23,15 +23,20 @@ type PackageOptions struct {
 	forceUpload        bool
 }
 
+type HistoryServerOptions struct {
+	Port int
+}
+
 type RemoveOptions struct {
 	StackName string `toml:"stack-name"`
 }
 
 type Config struct {
-	Deploy  DeployOptions
-	Local   LocalOptions
-	Package PackageOptions
-	Remove  RemoveOptions
+	Deploy        DeployOptions
+	Local         LocalOptions
+	Package       PackageOptions
+	Remove        RemoveOptions
+	HistoryServer HistoryServerOptions
 
 	// Root command options.
 	Profile string

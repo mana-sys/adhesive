@@ -44,7 +44,7 @@ func buildDockerCommand(entrypoint string, options *dockerOptions, args []string
 
 	wd, err := os.Getwd()
 
-	dockerArgs := []string{"run", "--rm", "-t"}
+	dockerArgs := []string{"run", "--rm", "-it"}
 	dockerArgs = append(dockerArgs, envs...)
 	dockerArgs = append(dockerArgs, vols...)
 	dockerArgs = append(dockerArgs, "-v", credsDir+":/root/.aws",
@@ -70,6 +70,7 @@ func buildAndRunDockerCommand(entrypoint string, options *dockerOptions, args []
 	if err != nil {
 		return err
 	}
+	dockerCmd.Stdin = os.Stdin
 
 	var wg sync.WaitGroup
 
@@ -85,6 +86,12 @@ func buildAndRunDockerCommand(entrypoint string, options *dockerOptions, args []
 		log.Debugf("End of stderr")
 		wg.Done()
 	}()
+	//go func() {
+	//	defer stdin.Close()
+	//	io.Copy(stdin, os.Stdin)
+	//	log.Debugf("End of stdin")
+	//	wg.Done()
+	//}()
 
 	wg.Add(2)
 
