@@ -5,9 +5,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/mana-sys/adhesive/internal/cli/command"
-
 	"github.com/mana-sys/adhesive/internal/cli"
+	"github.com/mana-sys/adhesive/internal/cli/command"
 )
 
 func main() {
