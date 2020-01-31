@@ -12,16 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type packageOptions struct {
-	templateFile       string
-	s3Bucket           string
-	s3Prefix           string
-	kmsKeyID           string
-	outputTemplateFile string
-	useJSON            bool
-	forceUpload        bool
-}
-
 func NewPackageCommand(adhesiveCli *command.AdhesiveCli, opts *config.PackageOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "package",
@@ -33,7 +23,7 @@ func NewPackageCommand(adhesiveCli *command.AdhesiveCli, opts *config.PackageOpt
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&opts.TemplateFile, "template-file", "template.yml", "The path where your AWS CloudFormation template is located")
+	flags.StringVar(&opts.TemplateFile, "template-file", "", "The path where your AWS CloudFormation template is located")
 	flags.StringVar(&opts.S3Bucket, "s3-bucket", "", "The S3 bucket where artifacts will be uploaded")
 	flags.StringVar(&opts.S3Prefix, "s3-prefix", "", "The prefix added to the names of the artifacts uploaded to the S3 bucket")
 	flags.StringVar(&opts.KmsKeyID, "kms-key-id", "", "The ID of the KMS key used to encrypt artifacts in the S3 bucket")
@@ -46,10 +36,6 @@ func NewPackageCommand(adhesiveCli *command.AdhesiveCli, opts *config.PackageOpt
 
 func package1(adhesiveCli *command.AdhesiveCli) error {
 	opts := adhesiveCli.Config.Package
-	var (
-		s3Bucket string
-		s3Prefix string
-	)
 
 	if err := adhesiveCli.InitializeClients(); err != nil {
 		return err
@@ -57,20 +43,18 @@ func package1(adhesiveCli *command.AdhesiveCli) error {
 
 	// Determine packaging parameters. These may come from either the packageOptions
 	// or from the CLI instance itself.
-	if opts.S3Bucket != "" {
-		s3Bucket = opts.S3Bucket
-	} else {
+	if opts.S3Bucket == "" {
 		return errors.New("must specify an S3 bucket")
 	}
 
-	if opts.S3Prefix != "" {
-		s3Prefix = opts.S3Prefix
+	if opts.TemplateFile == "" {
+		opts.TemplateFile = "template.yml"
 	}
 
 	// Initialize a packager.
 	pack := packager.NewFromS3(adhesiveCli.S3())
-	pack.S3Bucket = s3Bucket
-	pack.S3Prefix = s3Prefix
+	pack.S3Bucket = opts.S3Bucket
+	pack.S3Prefix = opts.S3Prefix
 	pack.KMSKeyID = opts.KmsKeyID
 	if opts.UseJSON {
 		pack.Format = packager.FormatJSON

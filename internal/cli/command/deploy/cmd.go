@@ -22,11 +22,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type deployOpts struct {
-	templateFile string
-	stackName    string
-}
-
 func NewDeployCommand(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy",
@@ -39,8 +34,7 @@ func NewDeployCommand(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptio
 	flags := cmd.Flags()
 	flags.BoolVarP(&opts.Guided, "guided", "g", false, "Allow Adhesive to guide you through the deployment")
 	flags.StringVar(&opts.StackName, "stack-name", "", "The name of the CloudFormation stack being deployed to")
-	flags.StringVar(&opts.TemplateFile, "template-file", "template.yml",
-		"The path to your CloudFormation template")
+	flags.StringVar(&opts.TemplateFile, "template-file", "", "The path to your CloudFormation template")
 
 	return cmd
 }
@@ -99,6 +93,10 @@ func deploy(adhesiveCli *command.AdhesiveCli) error {
 	// Option validation.
 	if opts.StackName == "" {
 		return errors.New("--stack-name must be specified")
+	}
+
+	if opts.TemplateFile == "" {
+		opts.TemplateFile = "template.yml"
 	}
 
 	// Read the template file.
