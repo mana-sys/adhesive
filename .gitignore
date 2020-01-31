@@ -2,6 +2,7 @@ sandbox/
 .idea/
 bin/
 .adhesive/
+dist/
 
 derby.log
 metastore_db/
