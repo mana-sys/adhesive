@@ -10,12 +10,7 @@ import (
 )
 
 func main() {
-	adhesiveCli, err := command.NewAdhesiveCli("")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
-		os.Exit(1)
-	}
-
+	adhesiveCli := command.NewAdhesiveCli()
 	cmd := cli.NewRootCommand(adhesiveCli)
 
 	if err := cmd.Execute(); err != nil {

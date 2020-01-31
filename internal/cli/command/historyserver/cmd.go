@@ -15,9 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewHistoryServerCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
-	opts := &adhesiveCli.Config.HistoryServer
-
+func NewHistoryServerCommand(adhesiveCli *command.AdhesiveCli, opts *config.HistoryServerOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "history-server",
 		Short: "Launch the Spark history server",
@@ -27,8 +25,8 @@ func NewHistoryServerCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.IntVarP(&opts.Port, "port", "p", opts.Port, "The port to listen on")
-	flags.StringVar(&opts.LogDirectory, "log-directory", opts.LogDirectory, "The location of the Spark logs. Must be an s3a:// formatted path.")
+	flags.IntVarP(&opts.Port, "port", "p", 0, "The port to listen on")
+	flags.StringVar(&opts.LogDirectory, "log-directory", "", "The location of the Spark logs. Must be an s3a:// formatted path.")
 
 	return cmd
 }

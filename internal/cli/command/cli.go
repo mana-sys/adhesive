@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go/service/glue"
@@ -31,28 +32,43 @@ type AdhesiveCli struct {
 	sess *session.Session
 }
 
-func NewAdhesiveCli(path string) (*AdhesiveCli, error) {
+func NewAdhesiveCli() *AdhesiveCli {
+	return &AdhesiveCli{}
+}
+
+func (cli *AdhesiveCli) ReloadConfigFile(path string) error {
 	var (
-		conf            = config.NewConfig()
-		foundConfigFile bool
+		conf             = config.NewConfig()
+		failFileNotFound = true
+		foundConfigFile  bool
 	)
 
 	if path == "" {
 		path = "adhesive.toml"
+		failFileNotFound = false
 	}
 
-	// Try reading configuration from adhesive.toml
+	// Try reading configuration from adhesive.toml.
 	err := config.LoadConfigFileInto(conf, path)
 	if pathErr, ok := err.(*os.PathError); ok && os.IsNotExist(pathErr) {
-		foundConfigFile = true
+		// If a configuration file was explicitly specified, then fail if it
+		// can't be read.
+		if failFileNotFound {
+			return err
+		}
+
+		log.Debugf("Unable to read default configuration file adhesive.toml. " +
+			"Continuing with defaults.")
 	} else if err != nil {
-		return nil, err
+		fmt.Println("Failing")
+		return err
+	} else {
+		foundConfigFile = true
 	}
 
-	return &AdhesiveCli{
-		Config:          conf,
-		FoundConfigFile: foundConfigFile,
-	}, nil
+	cli.FoundConfigFile = foundConfigFile
+	cli.Config = conf
+	return nil
 }
 
 func (cli *AdhesiveCli) InitializeClients() error {

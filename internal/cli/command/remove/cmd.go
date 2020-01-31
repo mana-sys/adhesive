@@ -15,24 +15,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewRemoveCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
-	opts := &adhesiveCli.Config.Remove
-
+func NewRemoveCommand(adhesiveCli *command.AdhesiveCli, opts *config.RemoveOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove",
 		Short: "Remove the current deployment of your CloudFormation template.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return remove(adhesiveCli, opts)
+			return remove(adhesiveCli)
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&opts.StackName, "stack-name", opts.StackName, "The name of the CloudFormation stack to remove")
+	flags.StringVar(&opts.StackName, "stack-name", "", "The name of the CloudFormation stack to remove")
 
 	return cmd
 }
 
-func remove(adhesiveCli *command.AdhesiveCli, opts *config.RemoveOptions) error {
+func remove(adhesiveCli *command.AdhesiveCli) error {
+	opts := adhesiveCli.Config.Remove
 	if err := adhesiveCli.InitializeClients(); err != nil {
 		return err
 	}

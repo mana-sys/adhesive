@@ -27,14 +27,12 @@ type deployOpts struct {
 	stackName    string
 }
 
-func NewDeployCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
-	var opts config.DeployOptions
-
+func NewDeployCommand(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy",
 		Short: "Deploy your AWS Glue jobs with CloudFormation",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy(adhesiveCli, &opts)
+			return deploy(adhesiveCli)
 		},
 	}
 
@@ -81,7 +79,8 @@ func promptOptions(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptions)
 	return false, nil
 }
 
-func deploy(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptions) error {
+func deploy(adhesiveCli *command.AdhesiveCli) error {
+	opts := adhesiveCli.Config.Deploy
 	if err := adhesiveCli.InitializeClients(); err != nil {
 		return err
 	}
@@ -92,7 +91,7 @@ func deploy(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptions) error 
 
 	// If the --guided flag was set, prompt for default options.
 	if opts.Guided {
-		if _, err := promptOptions(adhesiveCli, opts); err != nil {
+		if _, err := promptOptions(adhesiveCli, &opts); err != nil {
 			return err
 		}
 	}

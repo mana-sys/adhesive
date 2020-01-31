@@ -8,26 +8,39 @@ import (
 	package1 "github.com/mana-sys/adhesive/internal/cli/command/package"
 	"github.com/mana-sys/adhesive/internal/cli/command/remove"
 	"github.com/mana-sys/adhesive/internal/cli/command/startjobrun"
+	"github.com/mana-sys/adhesive/internal/cli/config"
 	"github.com/mana-sys/adhesive/internal/cli/version"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-type rootOptions struct {
-	configFile string
-	debug      bool
-}
-
 func NewRootCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
-	opts := adhesiveCli.Config
+	var (
+		conf       config.Config
+		configFile string
+		debug      bool
+	)
 
 	cmd := &cobra.Command{
 		Use: "adhesive",
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// Load configuration from the specified configuration file, or
+			// adhesive.toml if no file was specified.
+			if err := adhesiveCli.ReloadConfigFile(configFile); err != nil {
+				return err
+			}
+
+			//fmt.Println()
+
 			// Set debug mode.
-			if opts.Debug {
+			if debug {
 				logrus.SetLevel(logrus.DebugLevel)
 			}
+
+			// Merge configuration from flags.
+			adhesiveCli.Config.MergeConfig(&conf)
+
+			return nil
 		},
 		SilenceErrors:    true,
 		SilenceUsage:     true,
@@ -36,18 +49,19 @@ func NewRootCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.BoolVarP(&opts.Debug, "debug", "d", false, "Enable debug mode")
-	flags.StringVar(&opts.Profile, "profile", opts.Profile, "The profile to use")
-	flags.StringVarP(&opts.ConfigFile, "config", "c", "adhesive.toml",
+	flags.BoolVarP(&debug, "debug", "d", false, "Enable debug mode")
+	flags.StringVar(&conf.Profile, "profile", "", "The profile to use")
+	flags.StringVar(&conf.Region, "region", "", "Region to execute in")
+	flags.StringVarP(&configFile, "config", "c", "",
 		"Path to Adhesive configuration file")
 
 	cmd.AddCommand(
-		deploy.NewDeployCommand(adhesiveCli),
+		deploy.NewDeployCommand(adhesiveCli, &conf.Deploy),
 		local.NewLocalCommand(),
-		package1.NewPackageCommand(adhesiveCli),
-		remove.NewRemoveCommand(adhesiveCli),
-		historyserver.NewHistoryServerCommand(adhesiveCli),
-		startjobrun.NewStartJobRunCommand(adhesiveCli),
+		package1.NewPackageCommand(adhesiveCli, &conf.Package),
+		remove.NewRemoveCommand(adhesiveCli, &conf.Remove),
+		historyserver.NewHistoryServerCommand(adhesiveCli, &conf.HistoryServer),
+		startjobrun.NewStartJobRunCommand(adhesiveCli, &conf.StartJobRun),
 	)
 
 	return cmd

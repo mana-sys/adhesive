@@ -11,9 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewStartJobRunCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
-	opts := &adhesiveCli.Config.StartJobRun
-
+func NewStartJobRunCommand(adhesiveCli *command.AdhesiveCli, opts *config.StartJobRunOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start-job-run",
 		Short: "Remove the current deployment of your CloudFormation template.",
@@ -23,8 +21,8 @@ func NewStartJobRunCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&opts.StackName, "stack-name", opts.StackName, "The name of the CloudFormation stack to remove")
-	flags.StringVar(&opts.JobName, "job-name", opts.JobName, "The name of the Glue job to run. This can also be the logical resource ID.")
+	flags.StringVar(&opts.StackName, "stack-name", "", "The name of the CloudFormation stack to remove")
+	flags.StringVar(&opts.JobName, "job-name", "", "The name of the Glue job to run. This can also be the logical resource ID.")
 
 	return cmd
 }
