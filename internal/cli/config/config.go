@@ -48,8 +48,10 @@ type Config struct {
 	HistoryServer HistoryServerOptions
 
 	// Root command options.
-	Profile string
-	Region  string
+	ConfigFile string `toml:"-"`
+	Profile    string
+	Region     string
+	Debug      bool `toml:"-"`
 }
 
 func defaultConfig() *Config {

@@ -19,13 +19,13 @@ type rootOptions struct {
 }
 
 func NewRootCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
-	var opts rootOptions
+	opts := adhesiveCli.Config
 
 	cmd := &cobra.Command{
 		Use: "adhesive",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// Set debug mode.
-			if opts.debug {
+			if opts.Debug {
 				logrus.SetLevel(logrus.DebugLevel)
 			}
 		},
@@ -36,8 +36,9 @@ func NewRootCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.BoolVarP(&opts.debug, "debug", "d", false, "Enable debug mode")
-	flags.StringVarP(&opts.configFile, "config", "c", "adhesive.toml",
+	flags.BoolVarP(&opts.Debug, "debug", "d", false, "Enable debug mode")
+	flags.StringVar(&opts.Profile, "profile", opts.Profile, "The profile to use")
+	flags.StringVarP(&opts.ConfigFile, "config", "c", "adhesive.toml",
 		"Path to Adhesive configuration file")
 
 	cmd.AddCommand(

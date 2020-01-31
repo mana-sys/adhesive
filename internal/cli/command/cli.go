@@ -28,6 +28,7 @@ type AdhesiveCli struct {
 	cfn  *cloudformation.CloudFormation
 	s3   *s3.S3
 	glue *glue.Glue
+	sess *session.Session
 }
 
 func NewAdhesiveCli(path string) (*AdhesiveCli, error) {
@@ -55,13 +56,18 @@ func NewAdhesiveCli(path string) (*AdhesiveCli, error) {
 }
 
 func (cli *AdhesiveCli) InitializeClients() error {
-	sess, err := session.NewSession(&aws.Config{
-		Logger: aws.LoggerFunc(func(args ...interface{}) {
-			log.Debug(args...)
-		}),
-		LogLevel: aws.LogLevel(aws.LogDebugWithHTTPBody),
-		Region:   aws.String(cli.Config.Region),
+	sess, err := session.NewSessionWithOptions(session.Options{
+		Config: aws.Config{
+			Logger: aws.LoggerFunc(func(args ...interface{}) {
+				log.Debug(args...)
+			}),
+			LogLevel: aws.LogLevel(aws.LogDebugWithHTTPBody),
+			Region:   aws.String(cli.Config.Region),
+		},
+		Profile:           cli.Config.Profile,
+		SharedConfigState: session.SharedConfigEnable,
 	})
+
 	if err != nil {
 		return err
 	}
@@ -69,6 +75,7 @@ func (cli *AdhesiveCli) InitializeClients() error {
 	cli.cfn = cloudformation.New(sess)
 	cli.s3 = s3.New(sess)
 	cli.glue = glue.New(sess)
+	cli.sess = sess
 	return nil
 }
 
@@ -82,4 +89,8 @@ func (cli *AdhesiveCli) CloudFormation() *cloudformation.CloudFormation {
 
 func (cli *AdhesiveCli) Glue() *glue.Glue {
 	return cli.glue
+}
+
+func (cli *AdhesiveCli) Session() *session.Session {
+	return cli.sess
 }

@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mana-sys/adhesive/pkg/watchlog"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
@@ -97,10 +95,11 @@ func MonitorStack(cfn *cloudformation.CloudFormation, stackId, stackName string,
 
 func MonitorJobLogs(cwl *cloudwatchlogs.CloudWatchLogs, name, id string) error {
 	//ctx, cancel := context.WithCancel(context.Background())
-	w := watchlog.NewWatchLog(cwl)
+	//w := watchlog.NewWatchLog(cwl)
 
 	// Wait for the log streams to become available.
 
+	return nil
 }
 
 func ConsoleMonitorStack(ctx context.Context, state stackMonitorState) {
