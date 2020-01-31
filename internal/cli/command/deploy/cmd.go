@@ -35,6 +35,8 @@ func NewDeployCommand(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptio
 	flags.BoolVarP(&opts.Guided, "guided", "g", false, "Allow Adhesive to guide you through the deployment")
 	flags.StringVar(&opts.StackName, "stack-name", "", "The name of the CloudFormation stack being deployed to")
 	flags.StringVar(&opts.TemplateFile, "template-file", "", "The path to your CloudFormation template")
+	flags.BoolVar(&opts.NoExecuteChangeSet, "no-execute-change-set", false, "Specifies if change set execution is disabled")
+	flags.BoolVarP(&opts.NoConfirmChangeSet, "no-confirm-change-set", "y", false, "Don't prompt for confirmation before executing a change set")
 
 	return cmd
 }
@@ -61,14 +63,15 @@ func promptOptions(adhesiveCli *command.AdhesiveCli, opts *config.DeployOptions)
 	}
 
 	// Prompt confirm change set before deployment.
-	prompt = fmt.Sprintf("confirm changes before deployment: (%s) ", strconv.FormatBool(opts.ConfirmChangeSet))
+	prompt = fmt.Sprintf("confirm changes before deployment: (%s) ", strconv.FormatBool(!opts.NoConfirmChangeSet))
 	confirmChangeSet, err := util.ScannerPrompt(sc, prompt, []string{"true", "false"})
 	if err != nil {
 		return false, err
 	}
 
-	// Parsing here is infallible.
-	opts.ConfirmChangeSet, _ = strconv.ParseBool(confirmChangeSet)
+	// Parsing here is infallible. We actually need to get the opposite of what the user specified.
+	opts.NoConfirmChangeSet, _ = strconv.ParseBool(confirmChangeSet)
+	opts.NoConfirmChangeSet = !opts.NoConfirmChangeSet
 
 	return false, nil
 }
@@ -201,22 +204,24 @@ The following changes will be made as part of the deployment:
 	)
 
 	// If the --confirm-change-set flag is present, prompt for confirmation.
-	confirm, err := util.ScannerPrompt(sc, `
+	if !opts.NoConfirmChangeSet {
+		confirm, err := util.ScannerPrompt(sc, `
 Do you want to apply this change set?
     Only "yes" will be accepted to approve.
 
     Enter a value: `, nil)
-	if err == io.EOF {
-		fmt.Println("Abort.")
-		return nil
-	}
-	if err != nil {
-		return err
-	}
+		if err == io.EOF {
+			fmt.Println("Abort.")
+			return nil
+		}
+		if err != nil {
+			return err
+		}
 
-	if confirm != "yes" {
-		fmt.Printf("\nDeploy cancelled.\n")
-		return nil
+		if confirm != "yes" {
+			fmt.Printf("\nDeploy cancelled.\n")
+			return nil
+		}
 	}
 
 	fmt.Println()

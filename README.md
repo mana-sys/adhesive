@@ -46,6 +46,8 @@ deployments may be done by simply executing `adhesive deploy` again.
 | `-g`, `--guided` | Allow Adhesive to guide you through the deployment |
 | `--stack-name` | The name of the CloudFormation stack being deployed to |
 | `--template-file` |  The path to your CloudFormation template (default "template.yml") |
+| `-y`, `--no-confirm-change-set` | Don't prompt for confirmation before executing a change set |
+| `--no-execute-change-set` | Specifies if change set execution is disabled
 
 ### `adhesive local`
 The `adhesive local` command is a top level command for subcommands that 

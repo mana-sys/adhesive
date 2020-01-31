@@ -3,8 +3,8 @@ package config
 import "github.com/BurntSushi/toml"
 
 type DeployOptions struct {
-	ConfirmChangeSet   bool   `toml:"confirm-change-set"`
 	Guided             bool   `toml:"-"`
+	NoConfirmChangeSet bool   `toml:"no-confirm-change-set"`
 	NoExecuteChangeSet bool   `toml:"no-execute-change-set"`
 	StackName          string `toml:"stack-name"`
 	TemplateFile       string `toml:"template-file"`
@@ -177,8 +177,8 @@ func (opts *DeployOptions) mergeDeployOptions(other *DeployOptions) {
 		opts.TemplateFile = other.TemplateFile
 	}
 
-	if other.ConfirmChangeSet {
-		opts.ConfirmChangeSet = other.ConfirmChangeSet
+	if other.NoConfirmChangeSet {
+		opts.NoConfirmChangeSet = other.NoConfirmChangeSet
 	}
 
 	if other.Guided {
