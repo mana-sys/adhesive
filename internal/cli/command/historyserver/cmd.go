@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/processcreds"
 	"github.com/mana-sys/adhesive/internal/cli/command"
 	"github.com/mana-sys/adhesive/internal/cli/config"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -97,6 +98,8 @@ func historyServer(adhesiveCli *command.AdhesiveCli, opts *config.HistoryServerO
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
+	log.Debug("Running Docker command: ", cmd.Args)
 
 	if err = cmd.Start(); err != nil {
 		return err

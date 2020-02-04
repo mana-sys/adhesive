@@ -1,6 +1,9 @@
 package local
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/mana-sys/adhesive/internal/cli/command"
+	"github.com/spf13/cobra"
+)
 
 type dockerOptions struct {
 	arg         []string
@@ -13,7 +16,7 @@ type localOptions struct {
 	dockerOptions
 }
 
-func NewLocalCommand() *cobra.Command {
+func NewLocalCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 	var opts localOptions
 	cmd := &cobra.Command{
 		Use:   "local",
@@ -28,10 +31,10 @@ func NewLocalCommand() *cobra.Command {
 
 	dockerOpts := &opts.dockerOptions
 	cmd.AddCommand(
-		NewPipCommand(dockerOpts),
-		NewPySparkCommand(dockerOpts),
-		NewPytestCommand(dockerOpts),
-		NewSparkSubmitCommand(dockerOpts),
+		NewPipCommand(adhesiveCli, dockerOpts),
+		NewPySparkCommand(adhesiveCli, dockerOpts),
+		NewPytestCommand(adhesiveCli, dockerOpts),
+		NewSparkSubmitCommand(adhesiveCli, dockerOpts),
 	)
 
 	return cmd

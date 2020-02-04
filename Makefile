@@ -12,5 +12,8 @@ install: cli
 	cp bin/adhesive $(DESTDIR)$(PREFIX)/bin/
 	chmod +x $(DESTDIR)$(PREFIX)/bin/adhesive
 
+uninstall:
+	rm $(DESTDIR)$(PREFIX)/bin/adhesive
+
 clean:
 	rm -rf bin/

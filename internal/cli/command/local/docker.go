@@ -5,6 +5,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/aws/aws-sdk-go/aws/credentials/processcreds"
+	"github.com/mana-sys/adhesive/internal/cli/command"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -15,7 +19,8 @@ const (
 )
 
 // buildDockerCommand builds an exec.Cmd to run the Docker container with the provided options.
-func buildDockerCommand(entrypoint string, options *dockerOptions, args []string) (*exec.Cmd, error) {
+func buildDockerCommand(adhesiveCli *command.AdhesiveCli, entrypoint string, options *dockerOptions,
+	args []string) (*exec.Cmd, error) {
 	var (
 		err  error
 		envs []string
@@ -24,6 +29,24 @@ func buildDockerCommand(entrypoint string, options *dockerOptions, args []string
 
 	for _, env := range options.env {
 		envs = append(envs, "-e "+env)
+	}
+
+	// Super hack: If we used the ProcessProvider, then we pass the credentials via environment variables to the
+	// Docker container.
+	if err := adhesiveCli.InitializeClients(); err != nil {
+		return nil, err
+	}
+	value, err := adhesiveCli.Session().Config.Credentials.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	if value.ProviderName == processcreds.ProviderName {
+		envs = append(envs,
+			"-e", "AWS_ACCESS_KEY_ID="+value.AccessKeyID,
+			"-e", "AWS_SECRET_ACCESS_KEY="+value.SecretAccessKey,
+			"-e", "AWS_SESSION_TOKEN="+value.SessionToken,
+		)
 	}
 
 	for _, vol := range options.volumes {
@@ -52,11 +75,14 @@ func buildDockerCommand(entrypoint string, options *dockerOptions, args []string
 	return exec.Command("docker", dockerArgs...), nil
 }
 
-func buildAndRunDockerCommand(entrypoint string, options *dockerOptions, args []string) error {
-	dockerCmd, err := buildDockerCommand(entrypoint, options, args)
+func buildAndRunDockerCommand(adhesiveCli *command.AdhesiveCli, entrypoint string, options *dockerOptions,
+	args []string) error {
+	dockerCmd, err := buildDockerCommand(adhesiveCli, entrypoint, options, args)
 	if err != nil {
 		return err
 	}
+
+	log.Debug("Running Docker command: ", dockerCmd.Args)
 
 	dockerCmd.Stdin = os.Stdin
 	dockerCmd.Stdout = os.Stdout

@@ -30,8 +30,6 @@ func NewRootCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 				return err
 			}
 
-			//fmt.Println()
-
 			// Set debug mode.
 			if debug {
 				logrus.SetLevel(logrus.DebugLevel)
@@ -57,7 +55,7 @@ func NewRootCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 
 	cmd.AddCommand(
 		deploy.NewDeployCommand(adhesiveCli, &conf.Deploy),
-		local.NewLocalCommand(),
+		local.NewLocalCommand(adhesiveCli),
 		package1.NewPackageCommand(adhesiveCli, &conf.Package),
 		remove.NewRemoveCommand(adhesiveCli, &conf.Remove),
 		historyserver.NewHistoryServerCommand(adhesiveCli, &conf.HistoryServer),
