@@ -62,5 +62,7 @@ func NewRootCommand(adhesiveCli *command.AdhesiveCli) *cobra.Command {
 		startjobrun.NewStartJobRunCommand(adhesiveCli, &conf.StartJobRun),
 	)
 
+	cmd.SetVersionTemplate(version.Template)
+
 	return cmd
 }
