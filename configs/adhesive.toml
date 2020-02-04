@@ -4,8 +4,17 @@ region = "us-west-2"
 # The AWS profile to use for authentication.
 # profile = "dev"
 
+
 # Default options for the "adhesive deploy" command.
 [deploy]
+# no-confirm-change-set = false
+# no-execute-change-set = false
+
+# The name of the CloudFormation stack being deployed to.
+# stack-name = "my-stack"
+
+# The path where your AWS CloudFormation template is located.
+# template-file = "template.yml"
 
 
 # Default options for the "adhesive local" command.
@@ -15,7 +24,7 @@ region = "us-west-2"
 # Default options for the "adhesive package" command.
 [package]
 # The path where your AWS CloudFormation template is located.
-# template-file = "template.yml"
+# template-file = "template2.yml"
 
 # The S3 bucket where artifacts will be uploaded.
 # s3-bucket = "bucket"

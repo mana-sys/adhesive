@@ -1,0 +1,32 @@
+before:
+  hooks:
+builds:
+  - env:
+      - CGO_ENABLED=0
+    main: ./cmd/main.go
+    goos:
+      - darwin
+      - linux
+      - windows
+    ldflags:
+      - |
+        -s -w -X github.com/mana-sys/adhesive/internal/cli/version.Version={{.Version}}
+          -X github.com/mana-sys/adhesive/internal/cli/version.Commit={{.Commit}}
+          -X github.com/mana-sys/adhesive/internal/cli/version.Date={{.Date}}
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+snapshot:
+  name_template: '{{ .Tag }}-SNAPSHOT-{{.ShortCommit}}'
+checksum:
+  name_template: 'checksums.txt'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
